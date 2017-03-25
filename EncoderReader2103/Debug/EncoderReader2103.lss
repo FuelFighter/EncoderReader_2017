@@ -758,7 +758,7 @@ int main(void)
 		
 		if (printCount == 10)
 		{
-			printf("RPM: %u\n", rpm);
+			printf("RPM: %u\n\r", rpm);
      4ba:	0f 2e       	mov	r0, r31
      4bc:	f6 e0       	ldi	r31, 0x06	; 6
      4be:	4f 2e       	mov	r4, r31
@@ -826,7 +826,7 @@ int main(void)
      500:	1a 30       	cpi	r17, 0x0A	; 10
      502:	79 f4       	brne	.+30     	; 0x522 <main+0xa0>
 		{
-			printf("RPM: %u\n", rpm);
+			printf("RPM: %u\n\r", rpm);
      504:	8f 92       	push	r8
      506:	7f 92       	push	r7
      508:	5f 92       	push	r5
@@ -845,7 +845,7 @@ int main(void)
 		
 		if (printCount == 10)
 		{
-			printf("RPM: %u\n", rpm);
+			printf("RPM: %u\n\r", rpm);
 			printCount = 0;
 			count = 0;
      51c:	6a 2d       	mov	r22, r10
@@ -854,7 +854,7 @@ int main(void)
 		
 		if (printCount == 10)
 		{
-			printf("RPM: %u\n", rpm);
+			printf("RPM: %u\n\r", rpm);
 			printCount = 0;
      520:	10 e0       	ldi	r17, 0x00	; 0
 			count = 0;

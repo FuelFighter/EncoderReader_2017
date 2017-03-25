@@ -70,7 +70,7 @@ int main(void)
 		
 		if (printCount == 10)
 		{
-			printf("RPM: %u\n", rpm);
+			printf("RPM: %u\n\r", rpm);
 			printCount = 0;
 			count = 0;
 			TCNT1 = 0;
