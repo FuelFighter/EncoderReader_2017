@@ -21,7 +21,7 @@
 #define ENCODER_ID 5
 #define MEASURE 1
 #define SEND 2
-#define TIME_CONSTANT 1.126953
+#define RPM_CONSTANT 1.126953
 
 #define FILTER_SHIFT 2
 #define ENABLE_DIFF1 3
@@ -68,18 +68,7 @@ void low_pass_filter(uint32_t newValue, uint32_t *oldValue)
 
 uint16_t calculate_rpm_motors(uint32_t count)
 {
-	uint32_t output = 0;
-	if (count >= 200)
-	{
-		output = ENCODER_COUNT_CONSTANT/count;
-	} else if (count > ENCODER_COUNT_CONSTANT)
-	{
-		output = 0;
-	} else 
-	{
-		output = 0xFFFF;	
-	}
-	
+	uint32_t output = count*RPM_CONSTANT;
 	return output;
 }
 
@@ -127,21 +116,14 @@ int main(void)
 	uint8_t state = MEASURE;
     txFrame.id = ENCODER_ID;
 	txFrame.length = 5;
-	uint16_t time = 0;
 	
 	while (1) 
     {
 		
 		if (timer_elapsed_ms(TIMER0) > 100)
 		{
-			state = SEND;
-		}
-		
-		switch (state)
-		{
-		case SEND:
 			cli();
-			
+			printf("Count: %u \t",m1_counts);
 			m1_rpm = calculate_rpm_motors(m1_counts);
 			txFrame.data[0] = m1_rpm >> 8;
 			txFrame.data[1] = m1_rpm;
@@ -160,45 +142,39 @@ int main(void)
 			timer_start(TIMER0);
 			
 			sei();
-			break;
-			
-		case MEASURE:
-			//Encoder 1
-			if (!(PINF&(1<<ENCODER_I_1)) && (m1_state == 0))
-			{
-				m1_temp_count = TCNT1;
-				TCNT1 = 0;
-				low_pass_filter(m1_temp_count,&m1_counts);
-				m1_state = 1;
-			} else if ((PINF &(1<<ENCODER_I_1)) && m1_state)
-			{
+		}
+		//Encoder 1
+		if (!(PINF&(1<<ENCODER_I_1)) && (m1_state == 0))
+		{
+			m1_counts++;
+			m1_state = 1;
+		} else if ((PINF&(1<<ENCODER_I_1)) && m1_state)
+		{
 				m1_state = 0;
-			}
-			
-			//Encoder 2
-			if ((PINB & (1<<ENCODER_I_2)) && !m1_state)
-			{
-				m2_temp_count = TCNT3;
-				TCNT3 = 0;
-				low_pass_filter(m2_temp_count,&m2_counts);
-				m2_state = 1;
-			} else if (!(PINB & (1<<ENCODER_I_1)) && m1_state)
-			{
-				m2_state = 0;
-			}
-			
-			//Wheel Hall Sensor
-			if ((PINB & (1<<WHEEL_PIN)) && !m1_state)
-			{
-				w_counts = TCNT2;
-				TCNT2 = 0;
-				low_pass_filter(w_temp_count,&w_counts);
-				w_state = 1;
-			} else if (!(PINB & (1<<WHEEL_PIN)) && m1_state)
-			{
-				w_state = 0;
-			}
-			break;
+		}
+		
+		//Encoder 2
+		if ((PINB & (1<<ENCODER_I_2)) && !m1_state)
+		{
+			m2_temp_count = TCNT3;
+			TCNT3 = 0;
+			low_pass_filter(m2_temp_count,&m2_counts);
+			m2_state = 1;
+		} else if (!(PINB & (1<<ENCODER_I_1)) && m1_state)
+		{
+			m2_state = 0;
+		}
+		
+		//Wheel Hall Sensor
+		if ((PINB & (1<<WHEEL_PIN)) && !m1_state)
+		{
+			w_counts = TCNT2;
+			TCNT2 = 0;
+			low_pass_filter(w_temp_count,&w_counts);
+			w_state = 1;
+		} else if (!(PINB & (1<<WHEEL_PIN)) && m1_state)
+		{
+			w_state = 0;
 		}
 	}
 }
