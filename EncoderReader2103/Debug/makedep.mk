@@ -2,9 +2,9 @@
 # Automatically-generated file. Do not edit or delete the file
 ################################################################################
 
-can.c
+..\UniversalModuleDrivers\can.c
+
+..\UniversalModuleDrivers\usbdb.c
 
 main.c
-
-usbdb.c
 

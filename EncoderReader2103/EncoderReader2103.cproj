@@ -27,19 +27,19 @@
     <BootSegment>2</BootSegment>
     <eraseonlaunchrule>0</eraseonlaunchrule>
     <AsfFrameworkConfig>
-      <framework-data xmlns="">
+      <framework-data>
         <options />
         <configurations />
         <files />
         <documentation help="" />
         <offline-documentation help="" />
         <dependencies>
-          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.32.0" />
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.21.0" />
         </dependencies>
       </framework-data>
     </AsfFrameworkConfig>
     <avrtool>com.atmel.avrdbg.tool.atmelice</avrtool>
-    <avrtoolserialnumber>J41800031617</avrtoolserialnumber>
+    <avrtoolserialnumber>J41800024770</avrtoolserialnumber>
     <avrdeviceexpectedsignature>0x1E9781</avrdeviceexpectedsignature>
     <com_atmel_avrdbg_tool_atmelice>
       <ToolOptions>
@@ -49,7 +49,7 @@
         <InterfaceName>JTAG</InterfaceName>
       </ToolOptions>
       <ToolType>com.atmel.avrdbg.tool.atmelice</ToolType>
-      <ToolNumber>J41800031617</ToolNumber>
+      <ToolNumber>J41800024770</ToolNumber>
       <ToolName>Atmel-ICE</ToolName>
     </com_atmel_avrdbg_tool_atmelice>
     <avrtoolinterface>JTAG</avrtoolinterface>
@@ -136,19 +136,23 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="can.c">
+    <Compile Include="..\UniversalModuleDrivers\can.c">
       <SubType>compile</SubType>
+      <Link>can.c</Link>
     </Compile>
-    <Compile Include="can.h">
+    <Compile Include="..\UniversalModuleDrivers\can.h">
       <SubType>compile</SubType>
+      <Link>can.h</Link>
+    </Compile>
+    <Compile Include="..\UniversalModuleDrivers\usbdb.c">
+      <SubType>compile</SubType>
+      <Link>usbdb.c</Link>
+    </Compile>
+    <Compile Include="..\UniversalModuleDrivers\usbdb.h">
+      <SubType>compile</SubType>
+      <Link>usbdb.h</Link>
     </Compile>
     <Compile Include="main.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="usbdb.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="usbdb.h">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>

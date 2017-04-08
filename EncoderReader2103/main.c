@@ -13,8 +13,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <avr/interrupt.h>
-#include "usbdb.h"
-#include "can.h"
+#include "../UniversalModuleDrivers/usbdb.h"
+#include "../UniversalModuleDrivers/can.h"
 
 #define COUNTSPERROUND 512
 #define TIMECONSTANT_MS 100
@@ -25,10 +25,11 @@
 #define ENCODER_I_1	 PF3
 #define ENCODER_A_1	 PF2
 #define ENCODER_B_1  PF1
-#define ENABLE_DIFF2 PE3
-#define ENCODER_I_2	 PE4
-#define ENCODER_A_2	 PD2
-#define ENCODER_B_2  PD1
+#define ENABLE_DIFF2 PB0	
+#define ENCODER_I_2	 PB3
+#define ENCODER_A_2	 PB2
+#define ENCODER_B_2  PB1
+#define WHEEL_PIN PB4
 
 static uint8_t calculate = 0;
 static CanMessage_t canMessage;
@@ -36,14 +37,11 @@ static CanMessage_t canMessage;
 void pin_init(){
 	//Encoder 1 pin init
 	DDRF &= ~((1<<ENCODER_A_1)|(1<<ENCODER_B_1)|(1<<ENCODER_I_1));
-	//Encoder 2 pin init
-	DDRE &= ~(1<<ENCODER_I_2);
-	DDRD &= ~((1<<ENCODER_A_2)|(ENCODER_B_2));
+	//Encoder 2 pin init and Wheel Pin
+	DDRB &= ~((1<<ENCODER_I_2)|(1<<ENCODER_A_2)|(ENCODER_B_2)|(1<<WHEEL_PIN));
 	//Enable Differential IC's
 	PORTF |= (1<<ENABLE_DIFF1);
-	PORTE |= (1<<ENABLE_DIFF2);
-	//Wheel Hall Sensor pin init
-	// TBD
+	PORTB |= (1<<ENABLE_DIFF2);
 }
 
 void timer_init(){
@@ -64,7 +62,7 @@ int main(void)
 	pin_init();
 	usbdbg_init();
 	timer_init();
-	can_init();
+	can_init(0,0);
 	sei();
 	
 	canMessage.id = ENCODER_ID;
@@ -80,7 +78,9 @@ int main(void)
 	uint16_t countWheel = 0;
 	uint16_t rpmWheel = 0;
 	
-	uint8_t state = 0;
+	uint8_t state1 = 0;
+	uint8_t state2 = 0;
+	uint8_t stateWheel = 0;
     
 	while (1) 
     {
@@ -110,22 +110,45 @@ int main(void)
 		
 		if (printCount == 10)
 		{
+			cli();
 			printf("RPM 1: %u\n", rpm1);
 			printf("RPM 2: %u\n", rpm2);
 			printf("RPM Wheel: %u\n", rpmWheel);
 			printCount = 0;
 			TCNT1 = 0;
+			sei();
 		}
 		
-		if ((PINB & (1<<PB0)) && !state)
+		if ((PINF & (1<<ENCODER_I_1)) && !state1)
 		{
 			cli();
 			count1++;
 			sei();	
-			state = 1;
+			state1 = 1;
 			
-		} else if (!(PINB & (1<<PB0)) && state){
-			state = 0;
+		} else if (!(PINF & (1<<ENCODER_I_1)) && state1){
+			state1 = 0;
+		}
+		
+		if ((PINB & (1<<ENCODER_I_2)) && !state2)
+		{
+			cli();
+			count2++;
+			sei();
+			state2 = 1;
+			
+			} else if (!(PINB & (1<<ENCODER_I_2)) && state2){
+			state2 = 0;
+		}
+		if ((PINB & (1<<WHEEL_PIN)) && !stateWheel)
+		{
+			cli();
+			countWheel++;
+			sei();
+			stateWheel = 1;
+			
+			} else if (!(PINB & (1<<WHEEL_PIN)) && stateWheel){
+			stateWheel = 0;
 		}			
     }
 }
