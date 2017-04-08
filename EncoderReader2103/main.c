@@ -1,3 +1,4 @@
+
 /*
  * Encoder_Test_1603.c
  *
@@ -20,26 +21,27 @@
 #define COUNTCONSTANT 1.171875
 #define ENCODER_ID 5
 
-#define ENABLE_DIFF1 PF3
-#define ENCODER_I_1	 PF0
-#define ENCODER_A_1	 PF1
-#define ENCODER_B_1  PF2
-#define ENABLE_DIFF2 PB3
-#define ENCODER_I_2	 PB0
-#define ENCODER_A_2	 PB1
-#define ENCODER_B_2  PB2	
+#define ENABLE_DIFF1 PF0
+#define ENCODER_I_1	 PF3
+#define ENCODER_A_1	 PF2
+#define ENCODER_B_1  PF1
+#define ENABLE_DIFF2 PE3
+#define ENCODER_I_2	 PE4
+#define ENCODER_A_2	 PD2
+#define ENCODER_B_2  PD1
 
 static uint8_t calculate = 0;
 static CanMessage_t canMessage;
 
 void pin_init(){
 	//Encoder 1 pin init
-	DDRE &= ~((1<<ENCODER_A_1)|(1<<ENCODER_B_1)|(1<<ENCODER_I_1))
+	DDRF &= ~((1<<ENCODER_A_1)|(1<<ENCODER_B_1)|(1<<ENCODER_I_1));
 	//Encoder 2 pin init
-	DDRB &= ~((1<<ENCODER_A_2)|(1<<ENCODER_B_2)|(1<<ENCODER_I_2));
+	DDRE &= ~(1<<ENCODER_I_2);
+	DDRD &= ~((1<<ENCODER_A_2)|(ENCODER_B_2));
 	//Enable Differential IC's
-	PORTE |= (1<<ENABLE_DIFF1);
-	PORTB |= (1<<ENABLE_DIFF2);
+	PORTF |= (1<<ENABLE_DIFF1);
+	PORTE |= (1<<ENABLE_DIFF2);
 	//Wheel Hall Sensor pin init
 	// TBD
 }
