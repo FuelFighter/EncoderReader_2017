@@ -1,0 +1,3 @@
+[submodule "UniversalModuleDrivers"]
+	path = UniversalModuleDrivers
+	url = https://github.com/fuelfighter/UniversalModuleDrivers
