@@ -635,13 +635,13 @@ END GROUP
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000     0x1565
+.debug_info     0x00000000     0x1567
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000      0xa2d C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.1.130/gcc/dev/at90can128/avr51/crtat90can128.o
  .debug_info    0x00000a2d      0x173 adc.o
  .debug_info    0x00000ba0      0x3e7 can.o
- .debug_info    0x00000f87      0x24d usbdb.o
- .debug_info    0x000011d4      0x391 main.o
+ .debug_info    0x00000f87      0x24f usbdb.o
+ .debug_info    0x000011d6      0x391 main.o
 
 .debug_abbrev   0x00000000      0xef7
  *(.debug_abbrev)

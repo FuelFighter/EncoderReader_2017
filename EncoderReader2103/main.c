@@ -20,7 +20,6 @@
 #define COUNTSPERROUND 512
 #define TIMECONSTANT_MS 100
 #define COUNTCONSTANT 1.171875
-#define ENCODER_ID 5
 #define ENCODER_A_1	 3
 #define ENCODER_A_2	 2
 #define WHEEL_PIN 1
@@ -56,8 +55,8 @@ int main(void)
 	adc_init();
 	sei();
 	
-	canMessage.id = ENCODER_ID;
-	canMessage.length = 6;
+	canMessage.id = ENCODER_CAN_ID;
+	canMessage.length = 8;
 	
 	uint8_t printCount = 0;
 	uint16_t count1 = 0;

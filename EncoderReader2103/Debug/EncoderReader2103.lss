@@ -15,11 +15,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
   5 .debug_aranges 000000c8  00000000  00000000  00000cc8  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   00001565  00000000  00000000  00000d90  2**0
+  6 .debug_info   00001567  00000000  00000000  00000d90  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 00000ef7  00000000  00000000  000022f5  2**0
+  7 .debug_abbrev 00000ef7  00000000  00000000  000022f7  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   00000a31  00000000  00000000  000031ec  2**0
+  8 .debug_line   00000a31  00000000  00000000  000031ee  2**0
                   CONTENTS, READONLY, DEBUGGING
   9 .debug_frame  000001a8  00000000  00000000  00003c20  2**2
                   CONTENTS, READONLY, DEBUGGING
@@ -712,9 +712,9 @@ int usbdbg_tx_char(char c, FILE* stream)
 
 void usbdbg_init()
 {
-	const uint32_t baud_rate = 19200;
+	const uint32_t baud_rate = 250000;
 	UBRR0 = (F_CPU / 16) / baud_rate - 1;
- 4a4:	89 e1       	ldi	r24, 0x19	; 25
+ 4a4:	81 e0       	ldi	r24, 0x01	; 1
  4a6:	90 e0       	ldi	r25, 0x00	; 0
  4a8:	90 93 c5 00 	sts	0x00C5, r25	; 0x8000c5 <__TEXT_REGION_LENGTH__+0x7e00c5>
  4ac:	80 93 c4 00 	sts	0x00C4, r24	; 0x8000c4 <__TEXT_REGION_LENGTH__+0x7e00c4>
@@ -803,15 +803,15 @@ int main(void)
 	sei();
  512:	78 94       	sei
 	
-	canMessage.id = ENCODER_ID;
+	canMessage.id = ENCODER_CAN_ID;
  514:	ec e6       	ldi	r30, 0x6C	; 108
  516:	f2 e0       	ldi	r31, 0x02	; 2
- 518:	85 e0       	ldi	r24, 0x05	; 5
- 51a:	90 e0       	ldi	r25, 0x00	; 0
+ 518:	80 e2       	ldi	r24, 0x20	; 32
+ 51a:	92 e0       	ldi	r25, 0x02	; 2
  51c:	91 83       	std	Z+1, r25	; 0x01
  51e:	80 83       	st	Z, r24
-	canMessage.length = 6;
- 520:	86 e0       	ldi	r24, 0x06	; 6
+	canMessage.length = 8;
+ 520:	88 e0       	ldi	r24, 0x08	; 8
  522:	82 83       	std	Z+2, r24	; 0x02
 	uint16_t countWheel = 0;
 	uint16_t rpmWheel = 0;
@@ -851,8 +851,8 @@ int main(void)
  52e:	00 e0       	ldi	r16, 0x00	; 0
  530:	10 e0       	ldi	r17, 0x00	; 0
 	
-	canMessage.id = ENCODER_ID;
-	canMessage.length = 6;
+	canMessage.id = ENCODER_CAN_ID;
+	canMessage.length = 8;
 	
 	uint8_t printCount = 0;
 	uint16_t count1 = 0;
