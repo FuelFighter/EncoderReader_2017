@@ -6,6 +6,10 @@
 
 ..\UniversalModuleDrivers\can.c
 
+..\UniversalModuleDrivers\rgbled.c
+
+..\UniversalModuleDrivers\timer.c
+
 ..\UniversalModuleDrivers\usbdb.c
 
 main.c

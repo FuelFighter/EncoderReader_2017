@@ -153,6 +153,22 @@
       <SubType>compile</SubType>
       <Link>can.h</Link>
     </Compile>
+    <Compile Include="..\UniversalModuleDrivers\rgbled.c">
+      <SubType>compile</SubType>
+      <Link>rgbled.c</Link>
+    </Compile>
+    <Compile Include="..\UniversalModuleDrivers\rgbled.h">
+      <SubType>compile</SubType>
+      <Link>rgbled.h</Link>
+    </Compile>
+    <Compile Include="..\UniversalModuleDrivers\timer.c">
+      <SubType>compile</SubType>
+      <Link>timer.c</Link>
+    </Compile>
+    <Compile Include="..\UniversalModuleDrivers\timer.h">
+      <SubType>compile</SubType>
+      <Link>timer.h</Link>
+    </Compile>
     <Compile Include="..\UniversalModuleDrivers\usbdb.c">
       <SubType>compile</SubType>
       <Link>usbdb.c</Link>

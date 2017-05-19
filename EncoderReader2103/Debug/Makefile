@@ -39,6 +39,8 @@ SUBDIRS :=
 C_SRCS +=  \
 ../../UniversalModuleDrivers/adc.c \
 ../../UniversalModuleDrivers/can.c \
+../../UniversalModuleDrivers/rgbled.c \
+../../UniversalModuleDrivers/timer.c \
 ../../UniversalModuleDrivers/usbdb.c \
 ../main.c
 
@@ -52,24 +54,32 @@ ASM_SRCS +=
 OBJS +=  \
 adc.o \
 can.o \
+rgbled.o \
+timer.o \
 usbdb.o \
 main.o
 
 OBJS_AS_ARGS +=  \
 adc.o \
 can.o \
+rgbled.o \
+timer.o \
 usbdb.o \
 main.o
 
 C_DEPS +=  \
 adc.d \
 can.d \
+rgbled.d \
+timer.d \
 usbdb.d \
 main.d
 
 C_DEPS_AS_ARGS +=  \
 adc.d \
 can.d \
+rgbled.d \
+timer.d \
 usbdb.d \
 main.d
 
@@ -87,6 +97,10 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
+
+
+
+
 
 
 
