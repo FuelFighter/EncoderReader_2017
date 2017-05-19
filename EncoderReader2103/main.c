@@ -13,114 +13,111 @@
 #include <stdlib.h>
 #include <string.h>
 #include <avr/interrupt.h>
+#include "../UniversalModuleDrivers/rgbled.h"
 #include "../UniversalModuleDrivers/usbdb.h"
 #include "../UniversalModuleDrivers/can.h"
 #include "../UniversalModuleDrivers/adc.h"
+#include "../UniversalModuleDrivers/timer.h"
 
-#define COUNTSPERROUND 512
-#define TIMECONSTANT_MS 100
 #define COUNTCONSTANT 1.171875
-#define ENCODER_A_1	 3
-#define ENCODER_A_2	 2
-#define WHEEL_PIN 1
+#define WHEEL_COUNT_CONSTANT 60000
+#define ENCODER_A_1	 5 //PE5
+#define ENCODER_A_2	 2 //PD2
+#define WHEEL_PIN 1 //PD1
 #define BIT_TO_TORQUE 20.346
 
-static uint8_t calculate = 0;
+//ADC for M1 = ADC0
+//ADC for M2 = ADC3
+
 static CanMessage_t canMessage;
+uint32_t countTime = 0;
 
 void pin_init(){
 	//Encoder 1 pin init
-	DDRD &= ~((1<<ENCODER_A_1)|(1<<ENCODER_A_2)|(1<<WHEEL_PIN));
+	DDRD &= ~((1<<ENCODER_A_2)|(1<<WHEEL_PIN));
+	DDRE &= ~((1<<ENCODER_A_1));
 }
 
-void timer_init(){
+/*
+void interrupt_timer_init(){
 	//Calculating speed 10 times a second.
 	// ClkIO/64
 	TCCR1B |= (1<<CS11)|(1<<CS10);
 	//Enable Interrupt
-	TIMSK1 |= (1<<OCIE1A);
-	//Setting Compare register
-	OCR1A = 12500;
+	TIMSK1 |= (1<<TOIE1);
 	//Resetting Timer register
 	TCNT1 = 0;
-}
+}*/
 
 int main(void)
 {
 	cli();
 	pin_init();
 	usbdbg_init();
+	//interrupt_timer_init();
 	timer_init();
 	can_init(0,0);
 	adc_init();
+	rgbled_init();
 	sei();
 	
-	canMessage.id = ENCODER_CAN_ID;
-	canMessage.length = 8;
+	timer_start(TIMER1);
+	timer_start(TIMER2);
 	
-	uint8_t printCount = 0;
+	canMessage.id = ENCODER_CAN_ID;
+	canMessage.length = 6;
+
 	uint16_t count1 = 0;
 	uint16_t rpm1 = 0;
 	
 	uint16_t count2 = 0;
 	uint16_t rpm2 = 0;
 	
-	uint16_t countWheel = 0;
-	uint16_t rpmWheel = 0;
+	//uint16_t countWheel = 0;
+	uint32_t rpmWheel = 0;
 	
 	uint8_t state1 = 0;
 	uint8_t state2 = 0;
 	uint8_t stateWheel = 0;
-    int16_t measuredTorque = 0;
 	
 	while (1) 
     {
-		if (calculate == 1)
+		rgbled_toggle(LED_GREEN);
+		
+		if (timer_elapsed_ms(TIMER1) >= 100)
 		{
-			measuredTorque = adc_read(CH_ADC3) * BIT_TO_TORQUE;
+			rgbled_toggle(LED_BLUE);
 			
-			calculate = 0;
-			printCount++;
 			rpm1 = count1 * COUNTCONSTANT;
-			canMessage.data[0] = (rpm1 >> 8);
-			canMessage.data[1] = rpm1;
+			canMessage.data.u16[0] = rpm1;
 			
 			rpm2 = count2 * COUNTCONSTANT;
-			canMessage.data[2] = (rpm2 >> 8);
-			canMessage.data[3] = rpm2;
+			canMessage.data.u16[1] = rpm2;
 			
-			rpmWheel = countWheel * COUNTCONSTANT;
-			canMessage.data[4] = (rpmWheel >> 8);
-			canMessage.data[5] = rpmWheel;
+			if (timer_elapsed_ms(TIMER2) > 5000)
+			{
+				rpmWheel = 0;
+			}
 			
-			canMessage.data[6] = (measuredTorque >> 8);
-			canMessage.data[7] = measuredTorque;
-			
+			canMessage.data.u16[2] = rpmWheel;
 			can_send_message(&canMessage);
 			
 			count1 = 0;
 			count2 = 0;
-			countWheel = 0;
-			measuredTorque = 0;
-			TCNT1 = 0;
+			timer_start(TIMER1);
 		}
 		
-		if ((PIND & (1<<ENCODER_A_1)) && !state1)
+		if ((PINE & (1<<ENCODER_A_1)) && !state1)
 		{
-			cli();
 			count1++;
-			sei();	
-			state1 = 1;
-			
-		} else if (!(PIND & (1<<ENCODER_A_1)) && state1){
+			state1 = 1;	
+		} else if (!(PINE & (1<<ENCODER_A_1)) && state1){
 			state1 = 0;
 		}
 		
 		if ((PIND & (1<<ENCODER_A_2)) && !state2)
 		{
-			cli();
 			count2++;
-			sei();
 			state2 = 1;
 			
 			} else if (!(PIND & (1<<ENCODER_A_2)) && state2){
@@ -129,17 +126,16 @@ int main(void)
 		
 		if ((PIND & (1<<WHEEL_PIN)) && !stateWheel)
 		{
-			cli();
-			countWheel++;
-			sei();
+			rgbled_turn_off(LED_RED);
+			countTime = timer_elapsed_ms(TIMER2);
+			timer_start(TIMER2);
+			rpmWheel = WHEEL_COUNT_CONSTANT/countTime;
 			stateWheel = 1;
-			
-			} else if (!(PIND & (1<<WHEEL_PIN)) && stateWheel){
-			stateWheel = 0;
+		}
+		else if (!(PIND & (1<<WHEEL_PIN)) && stateWheel)
+		{
+			rgbled_turn_on(LED_RED);
+			stateWheel = 0;	
 		}			
     }
-}
-
-ISR(TIMER1_COMPA_vect){
-	calculate = 1;	
 }
