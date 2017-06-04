@@ -26,6 +26,19 @@
 #define WHEEL_PIN 1 //PD1
 #define BIT_TO_TORQUE 20.346
 
+#define ENCODER_1_REG PINE
+#define ENCODER_1_PIN 5
+#define ENCODER_1_INTERRUPT INT5
+#define ENCODER_1_INTERRUPT_VECT INT5_vect
+#define ENCODER_2_REG PIND
+#define ENCODER_2_PIN 2
+#define ENCODER_2_INTERRUPT INT2
+#define ENCODER_2_INTERRUPT_VECT INT2_vect
+
+static volatile uint32_t encoder_count_1 = 0;
+static volatile uint32_t encoder_count_2 = 0;
+
+
 //ADC for M1 = ADC0
 //ADC for M2 = ADC3
 
@@ -59,25 +72,27 @@ int main(void)
 	can_init(0,0);
 	adc_init();
 	rgbled_init();
+
+	// Enable interrupts with rising edge
+	EIMSK |= (1 << 2) | (1 << 5);
+	EICRA |= 0b00110000;
+	EICRB |= 0b00001100;
+
 	sei();
 	
 	timer_start(TIMER1);
 	timer_start(TIMER2);
 	
 	canMessage.id = ENCODER_CAN_ID;
-	canMessage.length = 6;
+	canMessage.length = 8;
 
-	uint16_t count1 = 0;
 	uint16_t rpm1 = 0;
 	
-	uint16_t count2 = 0;
 	uint16_t rpm2 = 0;
 	
 	//uint16_t countWheel = 0;
 	uint32_t rpmWheel = 0;
 	
-	uint8_t state1 = 0;
-	uint8_t state2 = 0;
 	uint8_t stateWheel = 0;
 	
 	while (1) 
@@ -88,10 +103,10 @@ int main(void)
 		{
 			rgbled_toggle(LED_BLUE);
 			
-			rpm1 = count1 * COUNTCONSTANT;
+			rpm1 = encoder_count_1 * COUNTCONSTANT;
 			canMessage.data.u16[0] = rpm1;
 			
-			rpm2 = count2 * COUNTCONSTANT;
+			rpm2 = encoder_count_2 * COUNTCONSTANT;
 			canMessage.data.u16[1] = rpm2;
 			
 			if (timer_elapsed_ms(TIMER2) > 5000)
@@ -100,33 +115,18 @@ int main(void)
 			}
 			
 			canMessage.data.u16[2] = rpmWheel;
+
+			canMessage.data.u16[3] = encoder_count_1;
 			can_send_message(&canMessage);
 			
-			count1 = 0;
-			count2 = 0;
+			encoder_count_1 = 0;
+			encoder_count_2 = 0;
 			timer_start(TIMER1);
-		}
-		
-		if ((PINE & (1<<ENCODER_A_1)) && !state1)
-		{
-			count1++;
-			state1 = 1;	
-		} else if (!(PINE & (1<<ENCODER_A_1)) && state1){
-			state1 = 0;
-		}
-		
-		if ((PIND & (1<<ENCODER_A_2)) && !state2)
-		{
-			count2++;
-			state2 = 1;
-			
-			} else if (!(PIND & (1<<ENCODER_A_2)) && state2){
-			state2 = 0;
 		}
 		
 		if ((PIND & (1<<WHEEL_PIN)) && !stateWheel)
 		{
-			rgbled_turn_off(LED_RED);
+			rgbled_turn_on(LED_RED);
 			countTime = timer_elapsed_ms(TIMER2);
 			timer_start(TIMER2);
 			rpmWheel = WHEEL_COUNT_CONSTANT/countTime;
@@ -134,8 +134,16 @@ int main(void)
 		}
 		else if (!(PIND & (1<<WHEEL_PIN)) && stateWheel)
 		{
-			rgbled_turn_on(LED_RED);
+			rgbled_turn_off(LED_RED);
 			stateWheel = 0;	
-		}			
+		}
     }
+}
+
+ISR(ENCODER_1_INTERRUPT_VECT) { // Motor 1
+	encoder_count_1++;
+}
+
+ISR(ENCODER_2_INTERRUPT_VECT) { // Motor 2
+	encoder_count_2++;
 }
